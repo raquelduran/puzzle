@@ -20,7 +20,7 @@ class Model{
 	generateBoard(){
 		var numbers = [1,2,3,4,5,6,7,8," "];
 		var order = [];
-		for (var i=0; order.length < numbers.length; i++){ // is this correct?
+		while(order.length < numbers.length){
 			var newNumber = numbers[Math.floor((Math.random()* numbers.length))];
 			if (order.indexOf(newNumber)==-1){
 				order.push(newNumber);
@@ -38,6 +38,20 @@ class Model{
 		console.log(order);
 		console.log(this.board);
 	}
+	blankSpace(){
+		var list = []
+		for(let i=0;i<3;i++){
+			for (let j=0;j<3;j++){
+				if (this.board[i][j] == " "){
+					list.push(i);
+					list.push(j);
+				}
+			}
+		}
+		return list
+	}
+
+
 } //model
 
 class View{
@@ -48,7 +62,7 @@ class View{
 	drawTable(){
 		var textTable = '<table id="t" border = "0" cellspacing ="5"> ';
 		for(let i=0;i<3;i++){
-			textTable += '<tr bgcolor = "#e0893c" height="100px">';
+			textTable += '<tr bgcolor = "#ea5b5b" height="100px">';
 			for (let j=0;j<3;j++){
 				textTable += '<td id="'+i+j+'"width="100"></td>';
 			}
@@ -68,6 +82,7 @@ class Controller{
 		this.model = new Model();
 		this.view = new View();
 		this.start();
+		this.color = "blue";
 	}
 	start(){
 		for(let i=0;i<3;i++){
@@ -75,7 +90,29 @@ class Controller{
 				this.view.placeNumber(i,j, this.model.board[i][j]);
 			}
 		}
+
+		
+		document.onkeydown = (e)=> this.checkKey(e,this);
+		document.getElementById("notifications").innerHTML = this.model.blankSpace();
 	}
+
+	checkKey(e, thisController){
+
+		e = e || window.event;
+		if (e.keyCode == '38') { // up arrow
+        	document.getElementById("notifications").innerHTML = thisController.color;
+    	}
+    	else if (e.keyCode == '40') { // down arrow
+        	document.getElementById("notifications").style.backgroundColor = "green";
+        }
+    	else if (e.keyCode == '37') { // left arrow
+       		document.getElementById("notifications").style.backgroundColor = "yellow";
+    	}
+    	else if (e.keyCode == '39') { // right arrow
+       		document.getElementById("notifications").style.backgroundColor = "blue";
+    	}
+	}
+
 } //controller
 
 window.onload = function(){
