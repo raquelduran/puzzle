@@ -15,6 +15,7 @@ ser probado
 class Model{ 
 	constructor(){
 		this.board = [[0,0,0],[0,0,0],[0,0,0]];
+		this.movements = 0;
 		this.generateBoard();
 	}
 	generateBoard(){
@@ -51,6 +52,22 @@ class Model{
 		return list
 	}
 
+	moveNumber(row1,column1){
+		var number = this.board[row1][column1];
+		this.board[this.blankSpace()[0]][this.blankSpace()[1]] = number;
+		this.board[row1][column1] = " ";
+		
+	}
+	checkIfWinner(){
+		if (this.board[0][0] == 1 && this.board[0][1] == 2 && this.board[0][2] == 3 && this.board[1][0] == 4 &&
+			this.board[1][1] == 5 && this.board[1][2] == 6 && this.board[2][0] == 7 && this.board[2][1] == 8 &&
+			this.board[2][2] == " "){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
 
 } //model
 
@@ -74,6 +91,9 @@ class View{
 	placeNumber(row,column, number){
 		document.getElementById(row.toString()+column.toString()).innerHTML = number;
 	}
+	createAlert(message){
+		alert(message);
+	}
 
 } //view
 
@@ -82,35 +102,56 @@ class Controller{
 		this.model = new Model();
 		this.view = new View();
 		this.start();
-		this.color = "blue";
 	}
 	start(){
-		for(let i=0;i<3;i++){
+		this.model.generateBoard();
+		this.placeBoard();
+		this.model.movements = 0;
+		document.onkeydown = (e)=> this.pressedKey(e,this);
+		document.getElementById("notifications").innerHTML = "Movimientos: " +this.model.movements;
+	}
+
+	placeBoard(){
+			for(let i=0;i<3;i++){
 			for (let j=0;j<3;j++){
 				this.view.placeNumber(i,j, this.model.board[i][j]);
 			}
-		}
+		}	
 
-		
-		document.onkeydown = (e)=> this.checkKey(e,this);
-		document.getElementById("notifications").innerHTML = this.model.blankSpace();
 	}
-
-	checkKey(e, thisController){
+	pressedKey(e, that){ //that means the controller's this
 
 		e = e || window.event;
 		if (e.keyCode == '38') { // up arrow
-        	document.getElementById("notifications").innerHTML = thisController.color;
+			if (that.model.blankSpace()[0] + 1 < 3){
+				that.model.moveNumber(that.model.blankSpace()[0]+1,that.model.blankSpace()[1]); 
+			}
     	}
     	else if (e.keyCode == '40') { // down arrow
-        	document.getElementById("notifications").style.backgroundColor = "green";
+    		if (that.model.blankSpace()[0] - 1 > -1){
+    			that.model.moveNumber(that.model.blankSpace()[0]-1,that.model.blankSpace()[1]);
+    		}
         }
     	else if (e.keyCode == '37') { // left arrow
-       		document.getElementById("notifications").style.backgroundColor = "yellow";
+       		if (that.model.blankSpace()[1] + 1 < 3){
+       			that.model.moveNumber(that.model.blankSpace()[0],that.model.blankSpace()[1]+1);
+       		}
     	}
     	else if (e.keyCode == '39') { // right arrow
-       		document.getElementById("notifications").style.backgroundColor = "blue";
+    		if (that.model.blankSpace()[1] - 1 > -1){
+    			that.model.moveNumber(that.model.blankSpace()[0],that.model.blankSpace()[1]-1);
+
+    		}
     	}
+  		that.placeBoard();
+		that.model.movements += 1;
+		document.getElementById("notifications").innerHTML = "Movimientos: " +that.model.movements;
+		
+		if (that.model.checkIfWinner()== true){
+			that.view.createAlert("Has ganado en "+ that.model.movements + " movimientos");
+			that.view.createAlert("Un nuevo juego va a comenzar");
+			that.start();
+		}
 	}
 
 } //controller
